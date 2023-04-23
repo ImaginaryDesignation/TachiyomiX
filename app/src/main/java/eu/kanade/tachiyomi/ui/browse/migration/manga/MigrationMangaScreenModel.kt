@@ -173,7 +173,7 @@ data class MigrateMangaState(
     val selectionMode = selected.isNotEmpty()
 
     val titles: List<MigrationMangaScreenItem>
-        get() = titleList ?: emptyList()
+        get() = titleList.orEmpty()
 
     val isLoading: Boolean
         get() = source == null || titleList == null
