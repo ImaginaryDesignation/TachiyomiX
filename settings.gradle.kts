@@ -35,7 +35,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Tachiyomi"
+rootProject.name = "TachiyomiX"
 include(":app")
 include(":i18n")
 include(":source-api")
