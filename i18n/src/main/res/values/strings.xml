@@ -1008,7 +1008,7 @@
     </plurals>
     <string name="latest_">Latest: %1$s</string>
     <string name="select_sources">Select sources</string>
-    <string name="select_none">Select none</string>
+    <string name="deselect_all">Deselect all</string>
     <string name="match_pinned_sources">Match pinned sources</string>
     <string name="match_enabled_sources">Match enabled sources</string>
     <string name="pre_migration_skip_toast">To show this screen again, go to Settings -> Library.</string>

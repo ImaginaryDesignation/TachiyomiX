@@ -2,34 +2,62 @@ package eu.kanade.tachiyomi.ui.browse.migration.advanced.design
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Deselect
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.FindReplace
+import androidx.compose.material.icons.outlined.FlipToBack
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.SelectAll
+import androidx.compose.material.icons.outlined.ToggleOn
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
@@ -41,14 +69,17 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.components.AppBar
-import eu.kanade.presentation.components.OverflowMenu
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.PreMigrationListBinding
 import eu.kanade.tachiyomi.ui.browse.migration.advanced.process.MigrationListScreen
 import eu.kanade.tachiyomi.ui.browse.migration.advanced.process.MigrationProcedureConfig
-import tachiyomi.presentation.core.components.material.ExtendedFloatingActionButton
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import tachiyomi.presentation.core.components.material.Scaffold
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
 
 class PreMigrationScreen(val mangaIds: List<Long>) : Screen {
 
@@ -57,7 +88,6 @@ class PreMigrationScreen(val mangaIds: List<Long>) : Screen {
         val screenModel = rememberScreenModel { PreMigrationScreenModel() }
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
         val navigator = LocalNavigator.currentOrThrow
-        var fabExpanded by remember { mutableStateOf(true) }
         val items by screenModel.state.collectAsState()
         val context = LocalContext.current
         DisposableEffect(screenModel) {
@@ -71,80 +101,26 @@ class PreMigrationScreen(val mangaIds: List<Long>) : Screen {
             }
         }
 
-        val nestedScrollConnection = remember {
-            // All this lines just for fab state :/
-            object : NestedScrollConnection {
-                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    fabExpanded = available.y >= 0
-                    return scrollBehavior.nestedScrollConnection.onPreScroll(available, source)
-                }
-
-                override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                    return scrollBehavior.nestedScrollConnection.onPostScroll(consumed, available, source)
-                }
-
-                override suspend fun onPreFling(available: Velocity): Velocity {
-                    return scrollBehavior.nestedScrollConnection.onPreFling(available)
-                }
-
-                override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                    return scrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
-                }
-            }
-        }
         Scaffold(
             topBar = {
                 AppBar(
                     title = stringResource(R.string.select_sources),
-                    navigateUp = navigator::pop,
                     scrollBehavior = scrollBehavior,
-                    actions = {
-                        IconButton(onClick = { screenModel.massSelect(false) }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Deselect,
-                                contentDescription = stringResource(R.string.select_none),
-                            )
-                        }
-                        IconButton(onClick = { screenModel.massSelect(true) }) {
-                            Icon(
-                                imageVector = Icons.Outlined.SelectAll,
-                                contentDescription = stringResource(R.string.action_select_all),
-                            )
-                        }
-                        OverflowMenu { closeMenu ->
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(stringResource(R.string.match_enabled_sources)) },
-                                onClick = {
-                                    screenModel.matchSelection(true)
-                                    closeMenu()
-                                },
-                            )
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(stringResource(R.string.match_pinned_sources)) },
-                                onClick = {
-                                    screenModel.matchSelection(false)
-                                    closeMenu()
-                                },
-                            )
-                        }
-                    },
                 )
             },
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    text = { Text(text = stringResource(R.string.action_migrate)) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowForward,
-                            contentDescription = stringResource(R.string.action_migrate),
-                        )
-                    },
-                    onClick = {
+            bottomBar = {
+                PreMigrationScreenBottomBar(
+                    modifier = Modifier,
+                    onSelectAll = { screenModel.massSelect(true) },
+                    onSelectNone = { screenModel.massSelect(false) },
+                    onSelectPinned = { screenModel.matchSelection(false) },
+                    onSelectEnabled = { screenModel.matchSelection(true) },
+                    onMigrateClick = {
                         if (!screenModel.dialog.isShowing) {
                             screenModel.dialog.show()
                         }
                     },
-                    expanded = fabExpanded,
+                    navigateUp = navigator::pop,
                 )
             },
         ) { contentPadding ->
@@ -154,7 +130,7 @@ class PreMigrationScreen(val mangaIds: List<Long>) : Screen {
             val top = with(density) { contentPadding.calculateTopPadding().toPx().roundToInt() }
             val right = with(density) { contentPadding.calculateRightPadding(layoutDirection).toPx().roundToInt() }
             val bottom = with(density) { contentPadding.calculateBottomPadding().toPx().roundToInt() }
-            Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
+            Box(modifier = Modifier) {
                 AndroidView(
                     factory = { context ->
                         screenModel.controllerBinding = PreMigrationListBinding.inflate(LayoutInflater.from(context))
@@ -189,6 +165,135 @@ class PreMigrationScreen(val mangaIds: List<Long>) : Screen {
                     },
                 )
             }
+        }
+    }
+
+    @Composable
+    fun PreMigrationScreenBottomBar(
+        modifier: Modifier,
+        onSelectAll: () -> Unit,
+        onSelectNone: () -> Unit,
+        onSelectPinned: () -> Unit,
+        onSelectEnabled: () -> Unit,
+        onMigrateClick: () -> Unit,
+        navigateUp: () -> Unit,
+    ) {
+        val scope = rememberCoroutineScope()
+        Surface(
+            modifier = modifier,
+            shape = MaterialTheme.shapes.large.copy(
+                bottomEnd = ZeroCornerSize,
+                bottomStart = ZeroCornerSize,
+            ),
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation = 0.dp),
+        ) {
+            val haptic = LocalHapticFeedback.current
+            val confirm = remember { mutableStateListOf(false, false, false, false, false, false) }
+            var resetJob: Job? = remember { null }
+            val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                (0 until 6).forEach { i -> confirm[i] = i == toConfirmIndex }
+                resetJob?.cancel()
+                resetJob = scope.launch {
+                    delay(1.seconds)
+                    if (isActive) confirm[toConfirmIndex] = false
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(
+                        WindowInsets.navigationBars
+                            .only(WindowInsetsSides.Bottom)
+                            .asPaddingValues(),
+                    )
+                    .padding(horizontal = 8.dp, vertical = 12.dp),
+            ) {
+                Button(
+                    title = stringResource(R.string.abc_action_bar_up_description),
+                    icon = Icons.Outlined.ArrowBack,
+                    toConfirm = confirm[0],
+                    onLongClick = { onLongClickItem(0) },
+                    onClick = navigateUp,
+                )
+                Button(
+                    title = stringResource(R.string.action_select_all),
+                    icon = Icons.Outlined.SelectAll,
+                    toConfirm = confirm[1],
+                    onLongClick = { onLongClickItem(1) },
+                    onClick = onSelectAll,
+                )
+                Button(
+                    title = stringResource(R.string.deselect_all),
+                    icon = Icons.Outlined.FlipToBack,
+                    toConfirm = confirm[2],
+                    onLongClick = { onLongClickItem(2) },
+                    onClick = onSelectNone,
+                )
+                Button(
+                    title = stringResource(R.string.match_enabled_sources),
+                    icon = Icons.Outlined.ToggleOn,
+                    toConfirm = confirm[3],
+                    onLongClick = { onLongClickItem(3) },
+                    onClick = onSelectEnabled,
+                )
+                Button(
+                    title = stringResource(R.string.match_pinned_sources),
+                    icon = Icons.Outlined.PushPin,
+                    toConfirm = confirm[4],
+                    onLongClick = { onLongClickItem(4) },
+                    onClick = onSelectPinned,
+                )
+                Button(
+                    title = stringResource(R.string.migrate),
+                    icon = Icons.Outlined.FindReplace,
+                    toConfirm = confirm[5],
+                    onLongClick = { onLongClickItem(5) },
+                    onClick = onMigrateClick,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun RowScope.Button(
+        title: String,
+        icon: ImageVector,
+        toConfirm: Boolean,
+        onLongClick: () -> Unit,
+        onClick: (() -> Unit),
+        content: (@Composable () -> Unit)? = null,
+    ) {
+        val animatedWeight by animateFloatAsState(if (toConfirm) 2f else 1f)
+        Column(
+            modifier = Modifier
+                .size(48.dp)
+                .weight(animatedWeight)
+                .combinedClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = rememberRipple(bounded = false),
+                    onLongClick = onLongClick,
+                    onClick = onClick,
+                ),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+            )
+            AnimatedVisibility(
+                visible = toConfirm,
+                enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+            ) {
+                Text(
+                    text = title,
+                    overflow = TextOverflow.Visible,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
+            content?.invoke()
         }
     }
 
