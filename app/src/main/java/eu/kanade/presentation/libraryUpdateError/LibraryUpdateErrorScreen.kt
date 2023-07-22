@@ -228,18 +228,6 @@ private fun LibraryUpdateErrorsBottomBar(
                 )
             }
             Button(
-                title = stringResource(R.string.migrate),
-                icon = Icons.Outlined.FindReplace,
-                toConfirm = confirm[1],
-                onLongClick = { onLongClickItem(1) },
-                onClick = if (selected.isNotEmpty()) {
-                    onMultiMigrateClicked
-                } else {
-                    {}
-                },
-                enabled = selected.isNotEmpty(),
-            )
-            Button(
                 title = stringResource(R.string.action_select_all),
                 icon = Icons.Outlined.SelectAll,
                 toConfirm = confirm[2],
@@ -286,6 +274,18 @@ private fun LibraryUpdateErrorsBottomBar(
                     {}
                 },
                 enabled = enableScrollToBottom,
+            )
+            Button(
+                title = stringResource(R.string.migrate),
+                icon = Icons.Outlined.FindReplace,
+                toConfirm = confirm[1],
+                onLongClick = { onLongClickItem(1) },
+                onClick = if (selected.isNotEmpty()) {
+                    onMultiMigrateClicked
+                } else {
+                    {}
+                },
+                enabled = selected.isNotEmpty(),
             )
         }
     }
