@@ -45,10 +45,29 @@ data class MigrationMangaScreen(
                 PreMigrationScreen.navigateToMigration(
                     Injekt.get<UnsortedPreferences>().skipPreMigration().get(),
                     navigator,
-                    listOf(it.id),
+                    listOf(it.manga.id),
                 )
             },
-            onClickCover = { navigator.push(MangaScreen(it.id)) },
+            onClickCover = { navigator.push(MangaScreen(it.manga.id)) },
+            onMultiMigrateClicked = {
+                if (state.selectionMode) {
+                    PreMigrationScreen.navigateToMigration(
+                        Injekt.get<UnsortedPreferences>().skipPreMigration().get(),
+                        navigator,
+                        state.selected.map { it.manga.id },
+                    )
+                } else {
+                    context.toast(R.string.migrating_all_entries)
+                    PreMigrationScreen.navigateToMigration(
+                        Injekt.get<UnsortedPreferences>().skipPreMigration().get(),
+                        navigator,
+                        state.titles.map { it.manga.id },
+                    )
+                }
+            },
+            onSelectAll = screenModel::toggleAllSelection,
+            onInvertSelection = screenModel::invertSelection,
+            onMangaSelected = screenModel::toggleSelection,
         )
 
         LaunchedEffect(Unit) {

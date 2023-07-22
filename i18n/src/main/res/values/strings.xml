@@ -993,6 +993,7 @@
     <string name="action_scroll_to_top">Scroll to top</string>
     <string name="action_scroll_to_bottom">Scroll to bottom</string>
 
+    <string name="migrating_all_entries">Migrating all entries from source</string>
     <string name="no_chapters_found_for_migration">No chapters found, this entry cannot be used for migration</string>
     <plurals name="entry_migrated">
         <item quantity="one">%d entry migrated</item>
