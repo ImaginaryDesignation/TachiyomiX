@@ -137,11 +137,6 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
 
         val target = inputData.getString(KEY_TARGET)?.let { Target.valueOf(it) } ?: Target.CHAPTERS
 
-        // If this is a chapter update, set the last update time to now
-        if (target == Target.CHAPTERS) {
-            libraryPreferences.libraryUpdateLastTimestamp().set(Date().time)
-        }
-
         val categoryId = inputData.getLong(KEY_CATEGORY, -1L)
         addMangaToQueue(categoryId)
 
@@ -332,6 +327,8 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         if (skippedUpdates.isNotEmpty() && libraryPreferences.showLibraryUpdateSkippedNotification().get()) {
             notifier.showUpdateSkippedNotification(skippedUpdates.size)
         }
+
+        libraryPreferences.libraryUpdateLastTimestamp().set(Date().time)
     }
 
     private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
