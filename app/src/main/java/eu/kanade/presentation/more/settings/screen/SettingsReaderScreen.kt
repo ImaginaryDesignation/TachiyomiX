@@ -389,7 +389,7 @@ object SettingsReaderScreen : SearchableSettings {
                     pref = readerPreferences.readerThreads(),
                     title = stringResource(R.string.download_threads),
                     subtitle = stringResource(R.string.download_threads_summary),
-                    entries = List(5) { it }.associateWith { it.toString() },
+                    entries = listOf(1, 2, 3, 4, 5).associateWith { it.toString() },
                 ),
                 Preference.PreferenceItem.ListPreference(
                     pref = readerPreferences.cacheSize(),
