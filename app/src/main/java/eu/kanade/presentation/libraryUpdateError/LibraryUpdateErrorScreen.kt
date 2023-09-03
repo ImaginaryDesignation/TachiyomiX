@@ -230,8 +230,8 @@ private fun LibraryUpdateErrorsBottomBar(
             Button(
                 title = stringResource(R.string.action_select_all),
                 icon = Icons.Outlined.SelectAll,
-                toConfirm = confirm[2],
-                onLongClick = { onLongClickItem(2) },
+                toConfirm = confirm[1],
+                onLongClick = { onLongClickItem(1) },
                 onClick = if (selected.isEmpty() or (selected.size != itemCount)) {
                     onSelectAll
                 } else {
@@ -242,8 +242,8 @@ private fun LibraryUpdateErrorsBottomBar(
             Button(
                 title = stringResource(R.string.action_select_inverse),
                 icon = Icons.Outlined.FlipToBack,
-                toConfirm = confirm[3],
-                onLongClick = { onLongClickItem(3) },
+                toConfirm = confirm[2],
+                onLongClick = { onLongClickItem(2) },
                 onClick = if (selected.isNotEmpty()) {
                     onInvertSelection
                 } else {
@@ -254,8 +254,8 @@ private fun LibraryUpdateErrorsBottomBar(
             Button(
                 title = stringResource(R.string.action_scroll_to_top),
                 icon = Icons.Outlined.ArrowUpward,
-                toConfirm = confirm[4],
-                onLongClick = { onLongClickItem(4) },
+                toConfirm = confirm[3],
+                onLongClick = { onLongClickItem(3) },
                 onClick = if (enableScrollToTop) {
                     scrollToTop
                 } else {
@@ -266,8 +266,8 @@ private fun LibraryUpdateErrorsBottomBar(
             Button(
                 title = stringResource(R.string.action_scroll_to_bottom),
                 icon = Icons.Outlined.ArrowDownward,
-                toConfirm = confirm[5],
-                onLongClick = { onLongClickItem(5) },
+                toConfirm = confirm[4],
+                onLongClick = { onLongClickItem(4) },
                 onClick = if (enableScrollToBottom) {
                     scrollToBottom
                 } else {
@@ -278,8 +278,8 @@ private fun LibraryUpdateErrorsBottomBar(
             Button(
                 title = stringResource(R.string.migrate),
                 icon = Icons.Outlined.FindReplace,
-                toConfirm = confirm[1],
-                onLongClick = { onLongClickItem(1) },
+                toConfirm = confirm[5],
+                onLongClick = { onLongClickItem(5) },
                 onClick = if (selected.isNotEmpty()) {
                     onMultiMigrateClicked
                 } else {
