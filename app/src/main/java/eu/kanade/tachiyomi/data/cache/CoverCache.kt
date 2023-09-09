@@ -86,6 +86,16 @@ class CoverCache(private val context: Context) {
         return deleted
     }
 
+    fun deleteFromCache(thumbnailUrl: String?): Int {
+        var deleted = 0
+
+        getCoverFile(thumbnailUrl)?.let {
+            if (it.exists() && it.delete()) ++deleted
+        }
+
+        return deleted
+    }
+
     /**
      * Delete custom cover of the manga from the cache
      *

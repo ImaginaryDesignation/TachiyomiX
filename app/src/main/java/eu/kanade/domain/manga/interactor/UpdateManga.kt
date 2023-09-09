@@ -3,6 +3,12 @@ package eu.kanade.domain.manga.interactor
 import eu.kanade.domain.manga.model.hasCustomCover
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.source.model.SManga
+import tachiyomi.domain.backup.service.BackupPreferences
+import tachiyomi.domain.backupManga.interactor.DeleteBackupManga
+import tachiyomi.domain.backupManga.interactor.GetAllBackupMangaByMangaId
+import tachiyomi.domain.backupManga.interactor.InsertBackupManga
+import tachiyomi.domain.backupManga.interactor.MigrateBackups
+import tachiyomi.domain.backupManga.model.BackupManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.manga.repository.MangaRepository
@@ -29,6 +35,10 @@ class UpdateManga(
         manualFetch: Boolean,
         coverCache: CoverCache = Injekt.get(),
     ): Boolean {
+        if (Manga.backupNeeded(localManga, remoteManga)) {
+            takeBackup(localManga, coverCache)
+        }
+
         val remoteTitle = try {
             remoteManga.title
         } catch (_: UninitializedPropertyAccessException) {
@@ -44,14 +54,8 @@ class UpdateManga(
                 remoteManga.thumbnail_url.isNullOrEmpty() -> null
                 !manualFetch && localManga.thumbnailUrl == remoteManga.thumbnail_url -> null
                 localManga.isLocal() -> Date().time
-                localManga.hasCustomCover(coverCache) -> {
-                    coverCache.deleteFromCache(localManga, false)
-                    null
-                }
-                else -> {
-                    coverCache.deleteFromCache(localManga, false)
-                    Date().time
-                }
+                localManga.hasCustomCover(coverCache) -> null
+                else -> Date().time
             }
 
         val thumbnailUrl = remoteManga.thumbnail_url?.takeIf { it.isNotEmpty() }
@@ -89,5 +93,45 @@ class UpdateManga(
         return mangaRepository.update(
             MangaUpdate(id = mangaId, favorite = favorite, dateAdded = dateAdded),
         )
+    }
+
+    companion object {
+
+        suspend fun migrateBackups(
+            prevMangaId: Long,
+            mangaId: Long,
+            migrateBackups: MigrateBackups = Injekt.get(),
+        ) {
+            return migrateBackups.await(mangaId, prevMangaId)
+        }
+
+        suspend fun takeBackup(
+            manga: Manga,
+            coverCache: CoverCache,
+            swap: Boolean = false,
+            backupPreferences: BackupPreferences = Injekt.get(),
+            getAllBackupMangaByMangaId: GetAllBackupMangaByMangaId = Injekt.get(),
+            deleteBackupManga: DeleteBackupManga = Injekt.get(),
+            insertBackupManga: InsertBackupManga = Injekt.get(),
+        ): InsertBackupManga.Result {
+            val backupManga = BackupManga(
+                id = -1L,
+                mangaId = manga.id,
+                thumbnailUrl = manga.thumbnailUrl,
+                backupTime = Date().time,
+            )
+            if (!swap) {
+                val backupMangaList = getAllBackupMangaByMangaId.getAllByMangaId(mangaId = manga.id)
+                val coverBackupSlots = backupPreferences.coverBackupLimit().get()
+                if (backupMangaList.size >= coverBackupSlots) {
+                    val sortedList = backupMangaList.sortedBy { it.backupTime }
+                    for (i in 0..(backupMangaList.size - coverBackupSlots)) {
+                        deleteBackupManga.await(sortedList[i].id)
+                        coverCache.deleteFromCache(sortedList[i].thumbnailUrl)
+                    }
+                }
+            }
+            return insertBackupManga.insert(backupManga)
+        }
     }
 }

@@ -362,6 +362,7 @@ class MigrationListScreenModel(
             mangaUpdate = mangaUpdate.copy(
                 dateAdded = prevManga.dateAdded,
             )
+            UpdateManga.migrateBackups(prevManga.id, manga.id)
         }
 
         updateManga.awaitAll(listOfNotNull(mangaUpdate, prevMangaUpdate))

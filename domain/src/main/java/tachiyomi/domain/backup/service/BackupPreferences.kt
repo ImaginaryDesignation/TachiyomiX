@@ -21,4 +21,12 @@ class BackupPreferences(
     fun backupLastTimestamp() = preferenceStore.getLong("backup_last_timestamp", 0L)
 
     fun autoBackupStatus() = preferenceStore.getInt("auto_backup_status", -1)
+
+    fun coverBackupLimit() = preferenceStore.getInt("cover_backup_slots", 3)
+
+    fun clearCoverBackupFilterCriteria() = preferenceStore.getInt("pref_clear_backup_filter_criteria", 0)
+
+    fun clearCoverBackupSortCriteria() = preferenceStore.getString("pref_clear_backup_sort_criteria", "ALPHABETICAL")
+
+    fun clearCoverBackupSortDirection() = preferenceStore.getString("pref_clear_backup_sort_direction", "ASCENDING")
 }

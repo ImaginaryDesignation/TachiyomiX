@@ -111,5 +111,8 @@ UPDATE mangas SET
     update_strategy = coalesce(:updateStrategy, update_strategy)
 WHERE _id = :mangaId;
 
+updateThumbnail:
+UPDATE mangas SET thumbnail_url = coalesce(:thumbnailUrl, thumbnail_url) WHERE _id = :mangaId;
+
 selectLastInsertedRowId:
 SELECT last_insert_rowid();

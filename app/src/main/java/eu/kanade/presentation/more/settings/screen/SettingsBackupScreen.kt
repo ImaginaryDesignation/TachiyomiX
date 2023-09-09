@@ -35,6 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.hippo.unifile.UniFile
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.extensions.RequestStoragePermission
@@ -78,11 +80,22 @@ object SettingsBackupScreen : SearchableSettings {
         DiskUtil.RequestStoragePermission()
 
         return listOf(
-            getCreateBackupPref(),
-            getRestoreBackupPref(),
+            getCoverBackupPref(backupPreferences = backupPreferences),
+            getLibraryBackupRestorePref(),
             getAutomaticBackupGroup(
                 backupPreferences = backupPreferences,
                 uiPreferences = uiPreferences,
+            ),
+        )
+    }
+
+    @Composable
+    private fun getLibraryBackupRestorePref(): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.library_backup_label),
+            preferenceItems = listOf(
+                getCreateBackupPref(),
+                getRestoreBackupPref(),
             ),
         )
     }
@@ -229,6 +242,30 @@ object SettingsBackupScreen : SearchableSettings {
                 modifier = Modifier.padding(start = 24.dp),
             )
         }
+    }
+
+    @Composable
+    private fun getCoverBackupPref(
+        backupPreferences: BackupPreferences,
+    ): Preference.PreferenceGroup {
+        val navigator = LocalNavigator.currentOrThrow
+        val coverBackupLimitPref = backupPreferences.coverBackupLimit()
+
+        return Preference.PreferenceGroup(
+            title = stringResource(R.string.cover_backup_label),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.ListPreference(
+                    pref = coverBackupLimitPref,
+                    title = stringResource(R.string.cover_backup_slots_label),
+                    entries = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).associateWith { it.toString() },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(R.string.pref_clear_backups),
+                    subtitle = stringResource(R.string.pref_clear_backups_summary),
+                    onClick = { navigator.push(ClearCoverBackupsScreen()) },
+                ),
+            ),
+        )
     }
 
     @Composable

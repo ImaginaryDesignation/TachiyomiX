@@ -16,6 +16,7 @@ import eu.kanade.domain.source.interactor.SetMigrateSorting
 import eu.kanade.domain.source.interactor.ToggleLanguage
 import eu.kanade.domain.source.interactor.ToggleSource
 import eu.kanade.domain.source.interactor.ToggleSourcePin
+import tachiyomi.data.backupManga.BackupMangaRepositoryImpl
 import tachiyomi.data.category.CategoryRepositoryImpl
 import tachiyomi.data.chapter.ChapterRepositoryImpl
 import tachiyomi.data.history.HistoryRepositoryImpl
@@ -27,6 +28,13 @@ import tachiyomi.data.source.SourceDataRepositoryImpl
 import tachiyomi.data.source.SourceRepositoryImpl
 import tachiyomi.data.track.TrackRepositoryImpl
 import tachiyomi.data.updates.UpdatesRepositoryImpl
+import tachiyomi.domain.backupManga.interactor.DeleteBackupManga
+import tachiyomi.domain.backupManga.interactor.DeleteBackupsByMangaId
+import tachiyomi.domain.backupManga.interactor.GetAllBackupManga
+import tachiyomi.domain.backupManga.interactor.GetAllBackupMangaByMangaId
+import tachiyomi.domain.backupManga.interactor.InsertBackupManga
+import tachiyomi.domain.backupManga.interactor.MigrateBackups
+import tachiyomi.domain.backupManga.repository.BackupMangaRepository
 import tachiyomi.domain.category.interactor.CreateCategoryWithName
 import tachiyomi.domain.category.interactor.DeleteCategory
 import tachiyomi.domain.category.interactor.GetCategories
@@ -70,6 +78,7 @@ import tachiyomi.domain.manga.interactor.GetMangaWithChapters
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.interactor.ResetViewerFlags
 import tachiyomi.domain.manga.interactor.SetMangaChapterFlags
+import tachiyomi.domain.manga.interactor.UpdateMangaThumbnail
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.domain.source.interactor.GetRemoteManga
 import tachiyomi.domain.source.interactor.GetSourcesWithNonLibraryManga
@@ -116,6 +125,7 @@ class DomainModule : InjektModule {
         addFactory { SetMangaViewerFlags(get()) }
         addFactory { NetworkToLocalManga(get()) }
         addFactory { UpdateManga(get()) }
+        addFactory { UpdateMangaThumbnail(get()) }
         addFactory { SetMangaCategories(get()) }
 
         addSingletonFactory<TrackRepository> { TrackRepositoryImpl(get()) }
@@ -161,6 +171,14 @@ class DomainModule : InjektModule {
         addFactory { GetLibraryUpdateErrors(get()) }
         addFactory { DeleteLibraryUpdateErrors(get()) }
         addFactory { InsertLibraryUpdateErrors(get()) }
+
+        addSingletonFactory<BackupMangaRepository> { BackupMangaRepositoryImpl(get()) }
+        addFactory { GetAllBackupManga(get()) }
+        addFactory { GetAllBackupMangaByMangaId(get()) }
+        addFactory { InsertBackupManga(get()) }
+        addFactory { DeleteBackupManga(get()) }
+        addFactory { DeleteBackupsByMangaId(get()) }
+        addFactory { MigrateBackups(get()) }
 
         addSingletonFactory<SourceRepository> { SourceRepositoryImpl(get(), get()) }
         addSingletonFactory<SourceDataRepository> { SourceDataRepositoryImpl(get()) }

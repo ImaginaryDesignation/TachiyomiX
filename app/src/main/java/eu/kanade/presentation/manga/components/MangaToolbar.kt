@@ -46,6 +46,7 @@ fun MangaToolbar(
     onClickEditCategory: (() -> Unit)?,
     onClickRefresh: () -> Unit,
     onClickMigrate: (() -> Unit)?,
+    onRestoreCoverClicked: (() -> Unit)?,
     // For action mode
     actionModeCounter: Int,
     onSelectAll: () -> Unit,
@@ -118,6 +119,15 @@ fun MangaToolbar(
                                 closeMenu()
                             },
                         )
+                        if (onRestoreCoverClicked != null) {
+                            DropdownMenuItem(
+                                text = { Text(text = stringResource(R.string.cover_backup_button)) },
+                                onClick = {
+                                    onRestoreCoverClicked()
+                                    closeMenu()
+                                },
+                            )
+                        }
                         if (onClickEditCategory != null) {
                             DropdownMenuItem(
                                 text = { Text(text = stringResource(R.string.action_edit_categories)) },

@@ -1,0 +1,27 @@
+CREATE TABLE manga_backup(
+    id INTEGER NOT NULL PRIMARY KEY,
+    manga_id INTEGER NOT NULL,
+    thumbnail_url TEXT,
+    backup_time INTEGER AS Long NOT NULL
+);
+
+getAllBackups:
+SELECT * FROM manga_backup;
+
+getBackupsByMangaId:
+SELECT * FROM manga_backup WHERE manga_id=:mangaId;
+
+insert:
+INSERT INTO manga_backup(manga_id, thumbnail_url, backup_time) VALUES (:mangaId, :thumbnailUrl, :backupTime);
+
+update:
+UPDATE manga_backup SET manga_id=:mangaId WHERE id=:id;
+
+delete:
+DELETE FROM manga_backup WHERE id=:id;
+
+deleteByMangaId:
+DELETE FROM manga_backup WHERE manga_id=:mangaId;
+
+deleteAll:
+DELETE FROM manga_backup;

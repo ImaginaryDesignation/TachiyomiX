@@ -1032,4 +1032,25 @@
     <string name="action_search_manually">Search manually</string>
     <string name="action_migrate_now">Migrate now</string>
     <string name="action_copy_now">Copy now</string>
+
+    <string name="library_backup_label">Library backups</string>
+    <string name="cover_backup_label">Cover backups</string>
+    <string name="cover_backup_slots_label">Maximum cover backups</string>
+
+    <string name="cover_backup_button">Restore cover</string>
+    <string name="delete_cover_backup_button">Delete cover</string>
+    <string name="info_empty_cover_backups">You have no backed up covers.</string>
+    <string name="dialog_delete_cover_confirm">Are you sure you want to delete this cover?</string>
+    <string name="dialog_restore_cover_confirm">Do you want to backup the current cover?</string>
+    <string name="dialog_restore_cover_yes">Yes</string>
+    <string name="dialog_restore_cover_no">No</string>
+    <string name="delete_cover_toast">Cover deleted</string>
+    <string name="delete_covers_toast">Covers deleted</string>
+    <string name="restore_cover_toast">Cover restored</string>
+    <string name="pref_clear_backups">Clear cover backups</string>
+    <string name="label_clear_backups">Clear cover backups (%d)</string>
+    <string name="label_number_of_backups">Number of backups</string>
+    <string name="label_count_backups">%1$d cover backups for this manga</string>
+    <string name="pref_clear_backups_summary">Manage cover backups for all manga in your library</string>
+    <string name="clear_cover_backup_confirmation">Are you sure? All cover backup for the selected manga will be lost</string>
 </resources>

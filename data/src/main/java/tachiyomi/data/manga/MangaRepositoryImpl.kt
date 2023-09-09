@@ -113,6 +113,18 @@ class MangaRepositoryImpl(
         }
     }
 
+    override suspend fun updateThumbnail(thumbnailUrl: String?, mangaId: Long): Boolean {
+        return try {
+            handler.await(inTransaction = true) {
+                mangasQueries.updateThumbnail(thumbnailUrl, mangaId)
+            }
+            true
+        } catch (e: Exception) {
+            logcat(LogPriority.ERROR, e)
+            false
+        }
+    }
+
     override suspend fun updateAll(mangaUpdates: List<MangaUpdate>): Boolean {
         return try {
             partialUpdate(*mangaUpdates.toTypedArray())

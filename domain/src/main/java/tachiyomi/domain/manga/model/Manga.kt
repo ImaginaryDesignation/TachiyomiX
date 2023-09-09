@@ -1,5 +1,6 @@
 package tachiyomi.domain.manga.model
 
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.UpdateStrategy
 import java.io.Serializable
 
@@ -106,5 +107,16 @@ data class Manga(
             updateStrategy = UpdateStrategy.ALWAYS_UPDATE,
             initialized = false,
         )
+
+        fun backupNeeded(
+            localManga: Manga,
+            remoteManga: SManga,
+        ): Boolean {
+            return if (localManga.favorite) {
+                !remoteManga.thumbnail_url.isNullOrEmpty() && (localManga.thumbnailUrl != remoteManga.thumbnail_url)
+            } else {
+                false
+            }
+        }
     }
 }
